@@ -29,9 +29,32 @@ def manual_nms(boxes, scores, class_ids, iou_threshold=0.5):
     Returns:
         List of indices of boxes to keep.
     """
-    # TODO: Implement manual NMS
-    # Hint: Use numpy.argsort, then iterate and compute IoU with kept boxes.
-    pass
+    if len(boxes) == 0:
+        return []
+
+    indices = np.argsort(scores)[::-1]
+    keep = []
+
+    while len(indices) > 0:
+        current = indices[0]
+        keep.append(int(current))
+
+        if len(indices) == 1:
+            break
+
+        current_box = boxes[current]
+        remaining_boxes = [boxes[i] for i in indices[1:]]
+
+        ious = [compute_iou(current_box, b, format="xywh") for b in remaining_boxes]
+
+        # Keep boxes with IoU below threshold OR different class
+        mask = [
+            (ious[i] < iou_threshold) or (class_ids[indices[i + 1]] != class_ids[current])
+            for i in range(len(ious))
+        ]
+        indices = indices[1:][mask]
+
+    return keep
 
 
 def opencv_nms(boxes, scores, conf_threshold=0.5, nms_threshold=0.4):
@@ -47,6 +70,11 @@ def opencv_nms(boxes, scores, conf_threshold=0.5, nms_threshold=0.4):
     Returns:
         List of indices of boxes to keep.
     """
-    # TODO: Implement cv2.dnn.NMSBoxes wrapper
-    # indices = cv2.dnn.NMSBoxes(boxes, scores, conf_threshold, nms_threshold)
-    pass
+    if len(boxes) == 0:
+        return []
+
+    indices = cv2.dnn.NMSBoxes(boxes, scores, conf_threshold, nms_threshold)
+    if indices is None:
+        return []
+    # Flatten nested arrays to plain Python ints
+    return [int(i) for i in indices.flatten()]
