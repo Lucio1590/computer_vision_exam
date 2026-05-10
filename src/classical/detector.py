@@ -8,6 +8,7 @@ for comparison against the YOLO deep-learning model.
 
 import cv2
 import numpy as np
+from sklearn.svm import LinearSVC
 from src.utils.config import CLASSICAL
 from src.preprocessing.image_pipeline import preprocess_for_classical
 
@@ -25,8 +26,16 @@ class HOGSVMDetector:
         )
         self.svm = None
         if svm_path:
-            # TODO: Load custom trained SVM
-            pass
+            self.svm = LinearSVC(C=CLASSICAL["svm_c"])
+            # Load coefficients from saved model if available
+            # For now, fall back to default detector if load fails
+            try:
+                data = np.load(svm_path, allow_pickle=True).item()
+                coefs = data["coef"]
+                intercept = data.get("intercept", 0.0)
+                self.hog.setSVMDetector(np.concatenate(([intercept], coefs.flatten())))
+            except Exception:
+                self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
         else:
             # Use OpenCV's default people detector as zero-training baseline
             self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
@@ -42,23 +51,61 @@ class HOGSVMDetector:
             List of detections, each as [class_id, confidence, x, y, w, h].
             For the default detector, class_id is always 0 (person).
         """
-        # TODO: Implement detection logic
-        # 1. Preprocess image (grayscale + equalization)
-        # 2. Run HOG detectMultiScale:
-        #    found, weights = self.hog.detectMultiScale(preprocessed, ...)
-        # 3. Convert outputs to [class_id, confidence, x, y, w, h] format
-        # 4. Apply custom NMS if needed (HOG already groups rectangles)
-        pass
+        preprocessed = preprocess_for_classical(image)
+
+        # detectMultiScale returns (rectangles, weights)
+        # rectangles: [[x, y, w, h], ...]
+        # weights: confidence scores for each detection
+        rects, weights = self.hog.detectMultiScale(
+            preprocessed,
+            winStride=(8, 8),
+            padding=(4, 4),
+            scale=CLASSICAL["scale_factor"],
+        )
+
+        detections = []
+        for i, (x, y, w, h) in enumerate(rects):
+            confidence = float(weights[i]) if i < len(weights) else 1.0
+            detections.append([0, confidence, int(x), int(y), int(w), int(h)])
+
+        return detections
 
     def train(self, positive_samples, negative_samples):
         """
         Train a custom linear SVM on HOG features.
 
         Args:
-            positive_samples: List of positive image crops (64x128).
-            negative_samples: List of negative image crops.
+            positive_samples: List of positive image crops (64x128 grayscale).
+            negative_samples: List of negative image crops (64x128 grayscale).
         """
-        # TODO: Extract HOG features from all samples
-        # TODO: Train sklearn.svm.LinearSVC
-        # TODO: Set trained SVM to HOG descriptor
-        pass
+        features = []
+        labels = []
+
+        win_size = CLASSICAL["hog_win_size"]
+
+        for img in positive_samples:
+            if img.shape[:2] != win_size[::-1]:
+                img = cv2.resize(img, win_size)
+            feat = self.hog.compute(img)
+            features.append(feat.flatten())
+            labels.append(1)
+
+        for img in negative_samples:
+            if img.shape[:2] != win_size[::-1]:
+                img = cv2.resize(img, win_size)
+            feat = self.hog.compute(img)
+            features.append(feat.flatten())
+            labels.append(0)
+
+        X = np.array(features, dtype=np.float32)
+        y = np.array(labels)
+
+        self.svm = LinearSVC(C=CLASSICAL["svm_c"], max_iter=10000)
+        self.svm.fit(X, y)
+
+        # Convert sklearn coefs to OpenCV HOGDescriptor SVM format
+        # OpenCV expects: [bias, coef_1, coef_2, ..., coef_n]
+        coefs = self.svm.coef_.flatten().astype(np.float64)
+        intercept = self.svm.intercept_[0]
+        svm_detector = np.concatenate(([intercept], coefs))
+        self.hog.setSVMDetector(svm_detector)
