@@ -23,18 +23,31 @@ def compute_iou(box_a, box_b, format="xywh") -> float:
     Args:
         box_a: First box.
         box_b: Second box.
-        format: "xywh" (center x,y + w,h) or "xyxy" (min/max corners).
+        format: "xywh" (top-left x,y + w,h) or "xyxy" (min/max corners).
 
     Returns:
         IoU value in range [0.0, 1.0].
     """
-    # TODO: Implement IoU calculation
-    # 1. Convert both boxes to xyxy if needed
-    # 2. Compute intersection coordinates
-    # 3. Compute intersection area
-    # 4. Compute union area = area_a + area_b - intersection_area
-    # 5. Return intersection_area / union_area
-    pass
+    if format == "xywh":
+        box_a = convert_xywh_to_xyxy(box_a)
+        box_b = convert_xywh_to_xyxy(box_b)
+
+    x1 = max(box_a[0], box_b[0])
+    y1 = max(box_a[1], box_b[1])
+    x2 = min(box_a[2], box_b[2])
+    y2 = min(box_a[3], box_b[3])
+
+    inter_w = max(0, x2 - x1)
+    inter_h = max(0, y2 - y1)
+    inter_area = inter_w * inter_h
+
+    area_a = (box_a[2] - box_a[0]) * (box_a[3] - box_a[1])
+    area_b = (box_b[2] - box_b[0]) * (box_b[3] - box_b[1])
+    union_area = area_a + area_b - inter_area
+
+    if union_area == 0:
+        return 0.0
+    return inter_area / union_area
 
 
 def compute_iou_matrix(boxes_a: list, boxes_b: list, format="xywh") -> np.ndarray:
@@ -49,5 +62,10 @@ def compute_iou_matrix(boxes_a: list, boxes_b: list, format="xywh") -> np.ndarra
     Returns:
         N x M numpy array of IoU values.
     """
-    # TODO: Implement pairwise IoU matrix (useful for mAP calculation)
-    pass
+    n = len(boxes_a)
+    m = len(boxes_b)
+    matrix = np.zeros((n, m), dtype=np.float32)
+    for i in range(n):
+        for j in range(m):
+            matrix[i, j] = compute_iou(boxes_a[i], boxes_b[j], format=format)
+    return matrix

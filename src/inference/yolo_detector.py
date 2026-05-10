@@ -11,6 +11,7 @@ from src.utils.config import YOLO_WEIGHTS_PATH, YOLO_CFG_PATH, YOLO, get_coco_cl
 from src.inference.model_loader import load_yolo_network
 from src.postprocessing.nms import opencv_nms
 from src.preprocessing.image_pipeline import preprocess_for_yolo
+from src.utils.visualization import draw_detections
 
 
 class YOLODetector:
@@ -38,18 +39,45 @@ class YOLODetector:
         Returns:
             List of detections, each as [class_id, confidence, x, y, w, h].
         """
-        # TODO: Implement full detection pipeline
-        # 1. Preprocess image -> blob
-        # 2. Set blob as input to network
-        # 3. Forward pass through output_layers
-        # 4. Parse detections:
-        #    - Each output layer is a NumPy array of shape (N, 5 + num_classes)
-        #    - Extract boxes, confidences, class_ids
-        # 5. Apply confidence threshold
-        # 6. Apply NMS (opencv_nms)
-        # 7. Scale boxes back to original image dimensions
-        # 8. Return filtered detections
-        pass
+        height, width = image.shape[:2]
+        blob = preprocess_for_yolo(image)
+        self.net.setInput(blob)
+        outputs = self.net.forward(self.output_layers)
+
+        boxes = []
+        confidences = []
+        class_ids = []
+
+        for output in outputs:
+            for detection in output:
+                scores = detection[5:]
+                class_id = int(np.argmax(scores))
+                confidence = float(detection[4]) * float(scores[class_id])
+
+                if confidence > self.conf_threshold:
+                    # YOLO returns center x, center y, width, height (normalized 0-1)
+                    center_x = int(detection[0] * width)
+                    center_y = int(detection[1] * height)
+                    box_w = int(detection[2] * width)
+                    box_h = int(detection[3] * height)
+
+                    # Convert to top-left corner for NMS
+                    x = int(center_x - box_w / 2)
+                    y = int(center_y - box_h / 2)
+
+                    boxes.append([x, y, box_w, box_h])
+                    confidences.append(confidence)
+                    class_ids.append(class_id)
+
+        # Apply NMS
+        indices = opencv_nms(boxes, confidences, self.conf_threshold, self.nms_threshold)
+
+        detections = []
+        for i in indices:
+            x, y, w, h = boxes[i]
+            detections.append([class_ids[i], confidences[i], x, y, w, h])
+
+        return detections
 
     def draw_detections(self, image: np.ndarray, detections: list) -> np.ndarray:
         """
@@ -62,5 +90,4 @@ class YOLODetector:
         Returns:
             Image with bounding boxes and labels.
         """
-        # TODO: Delegate to src.utils.visualization or implement inline
-        pass
+        return draw_detections(image, detections, self.classes)
