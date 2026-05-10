@@ -25,9 +25,27 @@ ANNOTATIONS_DIR = DATA_DIR / "annotations"
 
 def download_inria():
     """Download INRIA Person dataset."""
-    # TODO: Implement INRIA download and extraction
-    # URL: http://pascal.inrialpes.fr/data/human/INRIAPerson.tar
-    pass
+    from urllib.request import urlretrieve
+    import tarfile
+
+    url = "http://pascal.inrialpes.fr/data/human/INRIAPerson.tar"
+    dest = DATA_DIR / "INRIAPerson.tar"
+    extract_dir = RAW_DIR / "inria"
+
+    if extract_dir.exists() and any(extract_dir.iterdir()):
+        print(f"[SKIP] INRIA dataset already exists at {extract_dir}")
+        return
+
+    if not dest.exists():
+        print(f"[DOWNLOAD] INRIA Person dataset from {url}")
+        urlretrieve(url, dest)
+        print(f"[DONE] Saved to {dest}")
+
+    extract_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[EXTRACT] {dest} to {extract_dir}")
+    with tarfile.open(dest, "r") as tar:
+        tar.extractall(path=extract_dir)
+    print("[DONE] INRIA dataset ready")
 
 
 def download_coco_mini(num_images=100):
