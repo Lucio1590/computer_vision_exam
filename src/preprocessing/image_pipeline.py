@@ -20,8 +20,6 @@ def preprocess_for_yolo(image: np.ndarray) -> np.ndarray:
     Returns:
         A 4D blob with shape (1, 3, 416, 416).
     """
-    # TODO: Implement blob creation using cv2.dnn.blobFromImage
-    # Refer to config.PREPROCESSING for parameters (size, scalefactor, mean, swapRB, crop)
     blob = cv2.dnn.blobFromImage(
         image,
         scalefactor=PREPROCESSING["scalefactor"],
@@ -47,7 +45,6 @@ def preprocess_for_classical(image: np.ndarray) -> np.ndarray:
     Returns:
         Grayscale, equalized image.
     """
-    # TODO: Implement grayscale conversion and histogram equalization
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     equalized = cv2.equalizeHist(gray)
     return equalized
