@@ -100,3 +100,33 @@ def run_comparison(classical_detector, yolo_detector, test_images, output_dir):
 
     print(f"Comparison complete. Results saved to {output_dir}")
     return report
+
+
+def main():
+    import argparse
+    from pathlib import Path
+    import cv2
+    from src.classical.detector import HOGSVMDetector
+    from src.inference.yolo_detector import YOLODetector
+
+    parser = argparse.ArgumentParser(description="Compare Classical vs YOLO detectors")
+    parser.add_argument("--images", nargs="+", required=True, help="Paths to test images")
+    parser.add_argument("--output", default="docs/results", help="Output directory")
+    args = parser.parse_args()
+
+    image_paths = [Path(p) for p in args.images]
+    output_dir = Path(args.output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    classical = HOGSVMDetector()
+    yolo = YOLODetector()
+
+    report = run_comparison(classical, yolo, image_paths, output_dir)
+    print("\n--- Comparison Report ---")
+    print(f"Images processed: {report['num_images']}")
+    print(f"Classical FPS: {report['classical']['fps']:.2f}")
+    print(f"YOLO FPS: {report['yolo']['fps']:.2f}")
+
+
+if __name__ == "__main__":
+    main()
