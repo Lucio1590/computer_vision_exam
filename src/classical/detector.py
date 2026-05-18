@@ -109,3 +109,37 @@ class HOGSVMDetector:
         intercept = self.svm.intercept_[0]
         svm_detector = np.concatenate(([intercept], coefs))
         self.hog.setSVMDetector(svm_detector)
+
+
+def main():
+    import argparse
+    from pathlib import Path
+    import cv2
+
+    parser = argparse.ArgumentParser(description="HOG+SVM Object Detector")
+    parser.add_argument("--image", required=True, help="Path to input image")
+    parser.add_argument("--output", default="data/processed", help="Output directory")
+    parser.add_argument("--svm", default=None, help="Path to saved SVM model (optional)")
+    args = parser.parse_args()
+
+    image_path = Path(args.image)
+    output_dir = Path(args.output)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    image = cv2.imread(str(image_path))
+    if image is None:
+        raise FileNotFoundError(f"Could not load image: {image_path}")
+
+    detector = HOGSVMDetector(svm_path=args.svm)
+    detections = detector.detect(image)
+    print(f"Detected {len(detections)} objects")
+
+    from src.utils.visualization import draw_detections
+    annotated = draw_detections(image, detections)
+    out_path = output_dir / f"classical_{image_path.name}"
+    cv2.imwrite(str(out_path), annotated)
+    print(f"Saved result to {out_path}")
+
+
+if __name__ == "__main__":
+    main()
