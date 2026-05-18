@@ -88,6 +88,7 @@ cython_debug/
 PROJECT_PLAN.md
 What_was_done.md
 Project_steer.md
+AGENTS.md
 docs/
 
 # Project: generated outputs & raw data (keep folder structure via .gitkeep)
