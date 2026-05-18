@@ -197,5 +197,6 @@ data/processed/*
 !data/processed/.gitkeep
 docs/results/
 
-# Large model binaries
-models/*.weights
+# Large model binaries & downloaded model files
+models/*
+!models/.gitkeep
