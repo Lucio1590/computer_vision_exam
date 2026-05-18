@@ -186,3 +186,16 @@ What_was_done.md
 docs/project.md
 docs/Final\ Exam.pptx.pdf
 docs/technical_analysis.md
+
+# macOS
+.DS_Store
+
+# Generated outputs & raw data (keep folder structure via .gitkeep)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+docs/results/
+
+# Large model binaries
+models/*.weights
