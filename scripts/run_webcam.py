@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description="Live gesture recognition demo")
     parser.add_argument("--mode", choices=["classical", "deep"], default="classical",
                         help="Inference mode")
-    parser.add_argument("--source", default=0, help="Camera index or video path")
+    parser.add_argument("--source", default=0, type=lambda x: int(x) if x.isdigit() else x, help="Camera index (0) or video path")
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
     args = parser.parse_args()
