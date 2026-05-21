@@ -1,15 +1,13 @@
 """
-End-to-end pipeline smoke tests.
+End-to-end pipeline smoke tests for Hand Gesture Recognition.
+
+Tests that all modules import correctly and basic operations
+work on synthetic data.
 """
 
 import numpy as np
+import pytest
 
-try:
-    import pytest
-except ImportError:
-    pytest = None
-
-from src.classical.detector import HOGSVMDetector
 from src.preprocessing.image_pipeline import preprocess_for_yolo, preprocess_for_classical
 
 
@@ -26,43 +24,59 @@ class TestPreprocessing:
         assert out.shape == (480, 640)
 
 
-class TestClassicalDetector:
+class TestHandDetector:
+    def test_import(self):
+        from src.classical.hand_detector import HandDetector
+        assert HandDetector is not None
+
     def test_instantiation(self):
-        det = HOGSVMDetector()
+        from src.classical.hand_detector import HandDetector
+        det = HandDetector()
         assert det is not None
 
-    def test_detect_returns_list(self):
-        det = HOGSVMDetector()
-        img = np.random.randint(0, 255, (480, 640, 3), dtype=np.uint8)
-        dets = det.detect(img)
-        assert isinstance(dets, list)
-        # Each detection should be [class_id, confidence, x, y, w, h]
-        for d in dets:
-            assert len(d) == 6
+
+class TestFeatureExtractor:
+    def test_extractor_shape(self):
+        from src.classical.feature_extractor import FeatureExtractor
+        extractor = FeatureExtractor()
+        landmarks = [(0.1 * i, 0.1 * i, 0.0) for i in range(21)]
+        features = extractor.extract(landmarks)
+        assert isinstance(features, np.ndarray)
 
 
-class TestYOLODetector:
-    def test_instantiation(self):
-        # This requires model files to be present
-        try:
-            from src.inference.yolo_detector import YOLODetector
-            det = YOLODetector()
-            assert det is not None
-        except FileNotFoundError:
-            if pytest:
-                pytest.skip("YOLO model files not downloaded")
-            else:
-                print("SKIP: YOLO model files not downloaded")
+class TestGestureClassifier:
+    def test_import(self):
+        from src.classical.gesture_classifier import GestureClassifier
+        assert GestureClassifier is not None
 
-    def test_detect_requires_weights(self):
-        try:
-            from src.inference.yolo_detector import YOLODetector
-            det = YOLODetector()
-            img = np.random.randint(0, 255, (416, 416, 3), dtype=np.uint8)
-            dets = det.detect(img)
-            assert isinstance(dets, list)
-        except FileNotFoundError:
-            if pytest:
-                pytest.skip("YOLO model files not downloaded")
-            else:
-                print("SKIP: YOLO model files not downloaded")
+
+class TestYOLOHandDetector:
+    def test_import(self):
+        from src.deep_learning.yolo_detector import YOLOHandDetector
+        assert YOLOHandDetector is not None
+
+
+class TestGestureNet:
+    def test_import(self):
+        torch = pytest.importorskip("torch")
+        from src.deep_learning.gesture_net import GestureNet
+        assert GestureNet is not None
+
+
+class TestWebcamStreamer:
+    def test_import(self):
+        from src.webcam.streamer import WebcamStreamer
+        assert WebcamStreamer is not None
+
+
+class TestGesturePipeline:
+    def test_import(self):
+        from src.webcam.pipeline import GesturePipeline
+        assert GesturePipeline is not None
+
+    def test_mode_switch(self):
+        from src.webcam.pipeline import GesturePipeline
+        pipeline = GesturePipeline(mode="classical")
+        assert pipeline.mode == "classical"
+        pipeline.switch_mode("deep")
+        assert pipeline.mode == "deep"

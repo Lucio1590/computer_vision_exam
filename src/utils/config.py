@@ -3,6 +3,9 @@ Centralized configuration handler for the object detection framework.
 
 This module ensures DRY (Don't Repeat Yourself) by providing a single source
 of truth for paths, hyperparameters, and network settings.
+
+NOTE: Prefer importing from src.config for new code. This file is kept for
+backward compatibility with legacy modules.
 """
 
 import os
@@ -19,6 +22,8 @@ ANNOTATIONS_DIR = DATA_DIR / "annotations"
 
 # Model directories
 MODELS_DIR = PROJECT_ROOT / "models"
+
+# Legacy paths (kept for backward compatibility)
 YOLO_WEIGHTS_PATH = MODELS_DIR / "yolov3.weights"
 YOLO_CFG_PATH = MODELS_DIR / "yolov3.cfg"
 COCO_NAMES_PATH = MODELS_DIR / "coco.names"
@@ -30,21 +35,21 @@ for d in [DATA_DIR, RAW_DATA_DIR, PROCESSED_DATA_DIR, ANNOTATIONS_DIR, MODELS_DI
 
 # Preprocessing parameters
 PREPROCESSING = {
-    "input_size": (416, 416),      # Width, Height for YOLO
+    "input_size": (416, 416),      # Width, Height for legacy YOLO
     "scalefactor": 1 / 255.0,       # Normalization factor
     "mean": (0, 0, 0),              # Mean subtraction values (BGR)
     "swap_rb": True,                # BGR -> RGB swap
     "crop": False,                  # Whether to crop after resize
 }
 
-# YOLO inference parameters
+# Legacy YOLO inference parameters
 YOLO = {
     "conf_threshold": 0.5,
     "nms_threshold": 0.4,
     "output_format": "xywh",        # [x_center, y_center, width, height]
 }
 
-# Classical HOG+SVM parameters
+# Legacy Classical HOG+SVM parameters
 CLASSICAL = {
     "hog_win_size": (64, 128),      # Width, Height
     "hog_block_size": (16, 16),
