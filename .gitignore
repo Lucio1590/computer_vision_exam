@@ -101,3 +101,7 @@ docs/results/
 # Project: large model binaries & downloaded model files
 models/*
 !models/.gitkeep
+
+# Training artifacts
+runs/
+yolov8n.pt
