@@ -169,13 +169,26 @@ computer_vision_exam/
 
 | Metric | Value |
 |--------|-------|
-| CNN Validation Accuracy | **99.43%** |
+| CNN Validation Accuracy | **99.69%** |
 | CNN Training Epochs | 20 (best at epoch 10) |
 | YOLO mAP@0.5 | 0.85 (2 epochs, usable) |
 | Inference Time | ~15-30 ms/frame (MPS) |
 
 *Results on HaGRID 30k subset (6 classes: like, dislike, ok, palm, fist, peace).*
 *Note: YOLO detector was trained for 2 epochs due to time constraints. It is functional but may miss small hands. For production use, train for 10-20 epochs.*
+
+### End-to-End Evaluation
+
+An end-to-end comparative evaluation was run on the classifier test set (1,562 crops). Due to the crop format (224×224), the **detection rate** varies significantly between pipelines:
+
+| Pipeline | Detection Rate | Accuracy (on detected) |
+|----------|---------------|------------------------|
+| Classical (MediaPipe+SVM) | ~38% | ~21% |
+| Deep (YOLO+CNN) | ~2% | ~21% |
+
+The low detection rate is expected: MediaPipe and YOLO are designed for full-frame images, not pre-cropped hand regions. For meaningful end-to-end metrics, evaluate on full-frame test images or use ground-truth crops directly.
+
+**Validation accuracies (model-level) remain the authoritative metrics:** 91.65% (SVM) and 99.69% (CNN).
 
 ---
 
@@ -184,7 +197,7 @@ computer_vision_exam/
 The full methodology, experimental results, failure analysis, and ethical considerations are documented in:
 
 - **Source:** `docs/technical_analysis.md`
-- **PDF:** `docs/technical_analysis.pdf` (generate from markdown)
+- **PDF:** `docs/technical_analysis.pdf` (auto-generated from markdown)
 
 ---
 
