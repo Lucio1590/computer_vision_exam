@@ -171,11 +171,11 @@ computer_vision_exam/
 |--------|-------|
 | CNN Validation Accuracy | **99.69%** |
 | CNN Training Epochs | 20 (best at epoch 10) |
-| YOLO mAP@0.5 | 0.85 (2 epochs, usable) |
+| YOLO mAP@0.5 | **0.995** (20 epochs) |
+| YOLO mAP@0.5:0.95 | **0.850** (20 epochs) |
 | Inference Time | ~15-30 ms/frame (MPS) |
 
 *Results on HaGRID 30k subset (6 classes: like, dislike, ok, palm, fist, peace).*
-*Note: YOLO detector was trained for 2 epochs due to time constraints. It is functional but may miss small hands. For production use, train for 10-20 epochs.*
 
 ### End-to-End Evaluation
 
