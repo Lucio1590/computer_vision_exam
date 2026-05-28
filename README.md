@@ -186,9 +186,9 @@ An end-to-end comparative evaluation was run on the classifier test set (1,562 c
 | Classical (MediaPipe+SVM) | ~38% | ~21% |
 | Deep (YOLO+CNN) | ~2% | ~21% |
 
-The low detection rate is expected: MediaPipe and YOLO are designed for full-frame images, not pre-cropped hand regions. For meaningful end-to-end metrics, evaluate on full-frame test images or use ground-truth crops directly.
-
-**Validation accuracies (model-level) remain the authoritative metrics:** 91.65% (SVM) and 99.69% (CNN).
+> **⚠️ Methodological Note:** The low detection rates above are **not representative** of real-world performance. Both MediaPipe and YOLO are trained on full-frame images, not on pre-cropped 224×224 regions, so evaluating them on the classifier crop dataset produces artificially low detection rates. For meaningful end-to-end metrics, evaluate on full-frame test images or use ground-truth crops directly.
+>
+> **The authoritative model-level metrics are:** 91.65% (SVM) and 99.69% (CNN).
 
 ---
 
@@ -212,7 +212,7 @@ The full methodology, experimental results, failure analysis, and ethical consid
 
 ## License
 
-[Add your license here]
+This project is released under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
