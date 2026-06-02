@@ -86,8 +86,8 @@ class FeatureExtractor:
         palm_size = np.linalg.norm(lm[0] - lm[9])
         if palm_size > 1e-6:
             # Normalize all accumulated distances by palm size
-            # (distances are first 20 + 16 = 36 features)
-            num_dist_features = 20 + 16
+            # (distances are first 20 + 15 = 35 features)
+            num_dist_features = 20 + 15
             for i in range(num_dist_features):
                 features[i] /= palm_size
 
