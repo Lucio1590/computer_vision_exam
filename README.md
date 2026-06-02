@@ -70,7 +70,7 @@ python scripts/build_keypoint_dataset.py
 python scripts/train_svm.py
 
 # Deep Learning: YOLOv8n hand detector
-python scripts/train_yolo.py --epochs 20
+python scripts/train_yolo.py --epochs 30
 
 # Deep Learning: ResNet18 gesture classifier
 python scripts/train_classifier.py --epochs 20
@@ -129,7 +129,10 @@ computer_vision_exam/
 │   ├── hand_landmarker.task   # MediaPipe model
 │   ├── svm_keypoints.pkl      # Trained SVM + scaler
 │   ├── gesture_cnn.pt         # ResNet18 weights
-│   └── yolov8n_hand.pt        # Fine-tuned YOLO (gitignored)
+│   └── hand_detector/         # Fine-tuned YOLO weights (gitignored)
+│       └── weights/
+│           ├── best.pt          # Best model (30 epochs)
+│           └── last.pt          # Last checkpoint
 ├── src/
 │   ├── config.py              # Centralized configuration
 │   ├── preprocessing/         # Image pipelines
@@ -171,8 +174,11 @@ computer_vision_exam/
 |--------|-------|
 | CNN Validation Accuracy | **99.69%** |
 | CNN Training Epochs | 20 (best at epoch 10) |
-| YOLO mAP@0.5 | **0.995** (20 epochs) |
-| YOLO mAP@0.5:0.95 | **0.850** (20 epochs) |
+| YOLO mAP@0.5 | **0.995** (30 epochs) |
+| YOLO mAP@0.5:0.95 | **0.855** (30 epochs) |
+| YOLO Precision | 0.994 |
+| YOLO Recall | 0.989 |
+| YOLO Inference Speed | 3.1 ms/image (MPS) |
 | Inference Time | ~15-30 ms/frame (MPS) |
 
 *Results on HaGRID 30k subset (6 classes: like, dislike, ok, palm, fist, peace).*
@@ -205,7 +211,7 @@ The full methodology, experimental results, failure analysis, and ethical consid
 
 - **Privacy** — The webcam pipeline captures video locally. No frames or landmarks are transmitted to external servers. Obtain user consent before enabling camera access.
 - **Bias** — The HaGRID dataset is predominantly composed of subjects from specific geographic and demographic groups. Performance may degrade on underrepresented skin tones, hand sizes, or cultural gesture variations.
-- **Environmental Impact** — This project uses pre-trained weights (ResNet18, YOLOv8n) to avoid energy-intensive training from scratch. Fine-tuning is limited to 20 epochs.
+- **Environmental Impact** — This project uses pre-trained weights (ResNet18, YOLOv8n) to avoid energy-intensive training from scratch. Fine-tuning is limited to 30 epochs for YOLO and 20 epochs for the CNN.
 - **Regulatory Compliance** — Real-time gesture recognition in public or shared spaces may require consent under GDPR, CCPA, or local privacy laws.
 
 ---

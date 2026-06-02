@@ -23,10 +23,8 @@ KEYPOINTS_DATASET_DIR = PROCESSED_DATA_DIR / "keypoints"
 
 # Model directories
 MODELS_DIR = PROJECT_ROOT / "models"
-YOLO_HAND_MODEL_PATH = MODELS_DIR / "yolov8n_hand.pt"
-YOLO_HAND_MODEL_FALLBACK = (
-    PROJECT_ROOT / "runs" / "detect" / "models" / "yolov8n_hand" / "hand_detector" / "weights" / "best.pt"
-)
+YOLO_HAND_MODEL_PATH = MODELS_DIR / "hand_detector" / "weights" / "best.pt"
+YOLO_HAND_MODEL_FALLBACK = MODELS_DIR / "yolov8n_hand.pt"
 GESTURE_CNN_PATH = MODELS_DIR / "gesture_cnn.pt"
 SVM_KEYPOINTS_PATH = MODELS_DIR / "svm_keypoints.pkl"
 
@@ -67,7 +65,7 @@ CLASSICAL = {
 # YOLO parameters
 YOLO = {
     "model_name": "yolov8n.pt",
-    "epochs": 50,
+    "epochs": 30,
     "imgsz": 640,
     "batch": 16,
     "lr0": 0.01,
