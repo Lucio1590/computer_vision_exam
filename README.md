@@ -145,6 +145,18 @@ python scripts/run_webcam.py --mode deep --source 0
 #   'q' → quit
 ```
 
+### Web Live Demo
+
+Try the framework directly in your browser (no installation required):
+
+**[https://computer-vision-exam-web.vercel.app/](https://computer-vision-exam-web.vercel.app/)**
+
+The web deployment runs the same trained models as the local Python pipeline, converted to ONNX for in-browser inference via [Transformers.js](https://huggingface.co/docs/transformers.js) (Hugging Face). The export workflow is:
+
+- **ResNet18 Gesture CNN** — The PyTorch weights (`gesture_cnn.pt`) are exported to ONNX (`gesture_cnn.onnx`) using `torch.onnx.export(..., opset_version=11)` with dynamic axes for the batch dimension, ensuring compatibility with ONNX Runtime Web consumed by Transformers.js.
+- **SVM Keypoint Classifier** — The scikit-learn pipeline (`svm_keypoints.pkl`) is converted to ONNX (`svm_keypoints.onnx`) via `skl2onnx`, serializing the StandardScaler and RBF-kernel SVM into a single ONNX graph.
+- **Runtime** — In the browser, Transformers.js loads both ONNX models through ONNX Runtime Web and executes inference on the client side using WebGL/WASM backends, keeping all video data local and eliminating server-side compute.
+
 ### 6. Evaluate and Compare
 
 ```bash
