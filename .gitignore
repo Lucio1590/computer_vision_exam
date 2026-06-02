@@ -97,8 +97,18 @@ data/processed/*
 docs/results/
 
 # Project: large model binaries & downloaded model files
-models/*
+# Ignore everything in models/ by default
+models/**
 !models/.gitkeep
+# Allow trained finished models so the repo works out-of-the-box
+!models/gesture_cnn.pt
+!models/svm_keypoints.pkl
+!models/yolov8n_hand.pt
+!models/hand_landmarker.task
+!models/hand_detector/
+!models/hand_detector/weights/
+!models/hand_detector/weights/best.pt
+!models/hand_detector/weights/last.pt
 
 # Training artifacts
 runs/

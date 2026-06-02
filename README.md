@@ -43,14 +43,16 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Download Dataset
+### 2. Download Dataset (Optional for inference)
+
+> **Note:** Pre-trained model weights are already included in the repository (`models/`), so you can skip dataset download, dataset building, and training if you only want to run inference or the live demo.
 
 ```bash
 # Download HaGRID subset (~823MB) — requires Kaggle API token
 python scripts/download_hagrid.py --output data/raw/
 ```
 
-### 3. Build Processed Datasets
+### 3. Build Processed Datasets (Optional)
 
 ```bash
 # YOLO format for hand detection
@@ -63,7 +65,7 @@ python scripts/build_classifier_dataset.py
 python scripts/build_keypoint_dataset.py
 ```
 
-### 4. Train Models
+### 4. Train Models (Optional)
 
 ```bash
 # Classical: MediaPipe + SVM
@@ -129,7 +131,7 @@ computer_vision_exam/
 │   ├── hand_landmarker.task   # MediaPipe model
 │   ├── svm_keypoints.pkl      # Trained SVM + scaler
 │   ├── gesture_cnn.pt         # ResNet18 weights
-│   └── hand_detector/         # Fine-tuned YOLO weights (gitignored)
+│   └── hand_detector/         # Fine-tuned YOLO weights
 │       └── weights/
 │           ├── best.pt          # Best model (30 epochs)
 │           └── last.pt          # Last checkpoint
