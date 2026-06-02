@@ -113,3 +113,4 @@ models/**
 # Training artifacts
 runs/
 yolov8n.pt
+PROJECT_PLAN.md
