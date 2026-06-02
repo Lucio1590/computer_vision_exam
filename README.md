@@ -148,14 +148,16 @@ python scripts/run_webcam.py --mode deep --source 0
 ### 6. Evaluate and Compare
 
 ```bash
-# On classifier test dataset (with ground-truth labels)
-python -m src.evaluation.compare --mode dataset --output docs/results/
-
-# On custom full-frame images
+# On custom full-frame images (recommended — reflects real-world performance)
 python -m src.evaluation.compare --mode images --images image1.jpg image2.jpg --output docs/results/
+
+# On classifier test dataset (pre-cropped 224×224 images)
+python -m src.evaluation.compare --mode dataset --output docs/results/
 ```
 
-> **Note:** There is no dedicated single-image inference CLI. Use the webcam demo for live inference or the `compare` module for batch evaluation.
+> **⚠️ Evaluation Caveat:** The `--mode dataset` command evaluates on pre-cropped 224×224 classifier test images. Because both MediaPipe and YOLOv8 are trained on full-frame images, this produces artificially low detection rates that do **not** reflect real-world webcam performance. Use `--mode images` with full-frame photos or the live webcam demo for an authoritative end-to-end benchmark.
+>
+> **Note:** There is no dedicated single-image inference CLI. Use the webcam demo for live inference or the `compare --mode images` module for batch evaluation on full-frame photos.
 
 ---
 
@@ -201,11 +203,13 @@ computer_vision_exam/
 
 ## Results
 
+> **Metric Context:** The table below reports **model-level validation metrics** observed during training. The SVM and CNN accuracies are measured on pre-detected hand crops (i.e., after detection has already succeeded). The YOLO metrics are detection performance on full-frame validation images. **Real-world end-to-end performance is best demonstrated via the webcam demo on full-frame video.**
+
 ### Classical Pipeline (MediaPipe + SVM)
 
 | Metric | Value |
 |--------|-------|
-| Validation Accuracy | **91.65%** |
+| Validation Accuracy (model-level) | **91.65%** |
 | Precision (macro) | 0.93 |
 | Recall (macro) | 0.92 |
 | F1 (macro) | 0.92 |
@@ -216,21 +220,22 @@ computer_vision_exam/
 
 | Metric | Value |
 |--------|-------|
-| CNN Validation Accuracy | **99.69%*** |
+| CNN Validation Accuracy (model-level) | **99.69%*** |
 | CNN Training Epochs | up to 50 (early stopping, patience=5) |
-| YOLO mAP@0.5 | **0.995** (20 epochs) |
-| YOLO mAP@0.5:0.95 | **0.855** (20 epochs) |
-| YOLO Precision | 0.994 |
-| YOLO Recall | 0.989 |
+| YOLO mAP@0.5 (full-frame val) | **0.995** (20 epochs) |
+| YOLO mAP@0.5:0.95 (full-frame val) | **0.855** (20 epochs) |
+| YOLO Precision (full-frame val) | 0.994 |
+| YOLO Recall (full-frame val) | 0.989 |
 | Inference Time | ~15–30 ms/frame (MPS/GPU) |
 | Model Size | ~68 MB (23 MB YOLO + 45 MB CNN) |
 
 *Results on HaGRID sample 30k source, ~10k extracted samples (6 classes: like, dislike, ok, palm, fist, peace).*
 
 ### Key Findings
-- The **deep learning pipeline** delivers a **+7.8% accuracy gain** over the classical approach, making it the preferred choice for high-precision applications.
+- On **model-level classification** (pre-detected crops), the CNN delivers a **+7.8% accuracy gain** over the SVM. This makes the deep-learning pipeline the preferred choice when detection is already given and high precision is required.
 - The **classical pipeline** remains the optimal choice for edge/mobile deployment where latency and size (~1 MB) are primary constraints.
-- End-to-end evaluation on pre-cropped 224×224 images yields artificially low detection rates because both MediaPipe and YOLO are trained on full-frame images. *The 91.65% (SVM) and 99.69% (CNN) accuracies were observed during development on validation sets; they are model-level metrics and should be reproduced on full-frame test images for authoritative benchmarking.*
+- **End-to-end on full-frame images** (webcam / real-world use) is the authoritative benchmark. Both pipelines detect and classify reliably in this setting.
+- **Evaluation on pre-cropped 224×224 images yields artificially low detection rates** (~2–38%) because both MediaPipe and YOLO are trained on full-frame images. The `compare --mode dataset` script evaluates on pre-cropped classifier test data and should not be used as a proxy for real-world end-to-end performance.
 
 ---
 
