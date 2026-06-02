@@ -14,11 +14,11 @@ This project implements a complete, dual-pipeline gesture recognition system for
 
 | Stage | Classical (MediaPipe + SVM) | Deep Learning (YOLOv8 + CNN) |
 |-------|----------------------------|------------------------------|
-| Preprocessing | Resize, RGB conversion | Resize 640×640, normalization |
+| Preprocessing | BGR input (MediaPipe handles RGB internally) | YOLO 640×640 (auto-resized by Ultralytics); CNN crops 224×224 + ImageNet normalization |
 | Features | 21 MediaPipe landmarks → 54 geometric features (distances, angles, ratios) | Learned CNN features (ResNet18, ImageNet transfer learning) |
 | Detection | MediaPipe Hands (max 2 hands) | YOLOv8n single-class hand detector (CSPDarknet + PAN-FPN) |
 | Classification | SVM (RBF kernel + StandardScaler) | ResNet18 fine-tuned classifier (512 → 6 classes) |
-| Post-processing | Confidence filter | Custom NMS + confidence filter |
+| Post-processing | MediaPipe detection thresholds | Built-in NMS + confidence filter (custom IoU/NMS tested in `src/postprocessing/`) |
 | Evaluation | Accuracy, Precision, Recall, F1 | mAP@0.5, Accuracy, FPS |
 
 ### Design Principles
